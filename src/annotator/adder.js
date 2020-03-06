@@ -98,6 +98,8 @@ export class Adder {
     this._arrowDirection = 'up';
     this._onAnnotate = options.onAnnotate;
     this._onHighlight = options.onHighlight;
+    this._onShowAnnotations = options.onShowAnnotations;
+    this.annotationsForSelection = [];
     this._render();
   }
 
@@ -202,6 +204,9 @@ export class Adder {
         case 'highlight':
           this._onHighlight();
           break;
+        case 'view':
+          this._onShowAnnotations(this.annotationsForSelection);
+          break;
         default:
           break;
       }
@@ -214,6 +219,7 @@ export class Adder {
         isVisible={this._isVisible}
         arrowDirection={this._arrowDirection}
         onCommand={handleCommand}
+        showViewCommand={this.annotationsForSelection.length > 0}
       />,
       this._shadowRoot
     );

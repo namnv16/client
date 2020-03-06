@@ -22,6 +22,12 @@ animationPromise = (fn) ->
       catch error
         reject(error)
 
+annotationsForSelection = () ->
+  selection = document.getSelection()
+  range = selection.getRangeAt(0)
+  return rangeUtil.itemsForRange(selection.getRangeAt(0), (node) -> $(node).data('annotation'))
+
+
 # A selector which matches elements added to the DOM by Hypothesis (eg. for
 # highlights and annotation UI).
 #
@@ -70,6 +76,8 @@ module.exports = class Guest extends Delegator
         self.setVisibleHighlights(true)
         self.createHighlight()
         document.getSelection().removeAllRanges()
+      onShowAnnotations: (anns) ->
+        self.selectAnnotations(anns)
     })
     this.selections = selections(document).subscribe
       next: (range) ->
@@ -426,7 +434,9 @@ module.exports = class Guest extends Delegator
       .removeClass('h-icon-note')
       .addClass('h-icon-annotate');
 
+    annotations = annotationsForSelection()
     {left, top, arrowDirection} = this.adderCtrl.target(focusRect, isBackwards)
+    this.adderCtrl.annotationsForSelection = annotations
     this.adderCtrl.showAt(left, top, arrowDirection)
 
   _onClearSelection: () ->

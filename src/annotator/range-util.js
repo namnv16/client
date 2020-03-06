@@ -129,3 +129,33 @@ export function selectionFocusRect(selection) {
     return textBoxes[textBoxes.length - 1];
   }
 }
+
+/**
+ * Retrieve a set of items associated with nodes in a given range.
+ *
+ * @param {Range} range
+ * @param {(n: Node) => T} itemForNode - Return the item associated with a given node
+ * @return {T[]} items
+ */
+export function itemsForRange(range, itemForNode) {
+  const checkedNodes = new Set()
+
+  const items = [];
+  forEachNodeInRange(range, node => {
+    let current = node;
+    while (current) {
+      if (checkedNodes.has(current)) {
+        break;
+      }
+      checkedNodes.add(current);
+
+      const item = itemForNode(current);
+      if (item) {
+        items.push(item);
+      }
+
+      current = current.parentNode;
+    }
+  });
+  return items;
+}

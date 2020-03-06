@@ -31,7 +31,12 @@ ToolbarButton.propTypes = {
  * The toolbar that is displayed above selected text in the document providing
  * options to create annotations or highlights.
  */
-export default function AdderToolbar({ arrowDirection, isVisible, onCommand }) {
+export default function AdderToolbar({
+  arrowDirection,
+  isVisible,
+  onCommand,
+  showViewCommand = false,
+}) {
   const handleCommand = (event, command) => {
     event.preventDefault();
     event.stopPropagation();
@@ -44,6 +49,7 @@ export default function AdderToolbar({ arrowDirection, isVisible, onCommand }) {
   // the shortcut. This avoids conflicts with browser/OS shortcuts.
   const annotateShortcut = isVisible ? 'a' : null;
   const highlightShortcut = isVisible ? 'h' : null;
+  const viewShortcut = isVisible ? 'v' : null;
 
   // nb. The adder is hidden using the `visibility` property rather than `display`
   // so that we can compute its size in order to position it before display.
@@ -69,6 +75,14 @@ export default function AdderToolbar({ arrowDirection, isVisible, onCommand }) {
           label="Highlight"
           shortcut={highlightShortcut}
         />
+        {showViewCommand && (
+          <ToolbarButton
+            icon="h-icon-visibility"
+            onClick={e => handleCommand(e, 'view')}
+            label="View annotations"
+            shortcut={viewShortcut}
+          />
+        )}
       </hypothesis-adder-actions>
     </hypothesis-adder-toolbar>
   );
@@ -88,8 +102,13 @@ AdderToolbar.propTypes = {
   isVisible: propTypes.bool.isRequired,
 
   /**
-   * Callback invoked with the name ("annotate", "highlight") of the selected
-   * command when a toolbar command is clicked.
+   * Callback invoked with the name ("annotate", "highlight", "view") of the
+   * selected command when a toolbar command is clicked.
    */
   onCommand: propTypes.func.isRequired,
+
+  /**
+   * Whether to show the "View" command or not.
+   */
+  showViewCommand: propTypes.bool,
 };
