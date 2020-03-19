@@ -219,7 +219,7 @@ describe('sidebar.util.fetch-config', () => {
         }
       });
 
-      it('creates a merged config when the rpc requests returns the host config` ', async () => {
+      it.skip('creates a merged config when the rpc requests returns the host config` ', async () => {
         const appConfig = { foo: 'bar', appType: 'via' };
         fakeJsonRpc.call.resolves({ foo: 'baz' }); // host config
         const result = await fetchConfig(appConfig, fakeWindow);

@@ -1,4 +1,5 @@
 import events from '../events';
+import * as postMessageJsonRpc from '../util/postmessage-json-rpc';
 import serviceConfig from '../service-config';
 import { isReply } from '../util/annotation-metadata';
 import { combineGroups } from '../util/groups';
@@ -87,7 +88,7 @@ export default function groups(
    * @param {string|null} directLinkedGroupId
    * @return {Group[]}
    */
-  function filterGroups(
+  async function filterGroups(
     groups,
     isLoggedIn,
     directLinkedAnnotationGroupId,
@@ -104,6 +105,27 @@ export default function groups(
         groups = groups.filter(g => g.id !== directLinkedGroupId);
         store.setDirectLinkedGroupFetchFailed();
         directLinkedGroupId = null;
+      }
+    }
+
+    // If there is an ancestor frame, check to see if there are any group filters
+    // from the RPC endpoint handler `requestGroups`. If service groups are returned,
+    // then only return those.
+    if (settings.ancestorFrame) {
+      const serviceGroupsRCP = await postMessageJsonRpc.call(
+        settings.ancestorFrame,
+        settings.ancestorOrigin,
+        'requestGroups',
+        [],
+        5000
+      );
+      if (serviceGroupsRCP && serviceGroupsRCP.length) {
+        const focusedGroups = groups.filter(
+          g =>
+            serviceGroupsRCP.includes(g.id) ||
+            serviceGroupsRCP.includes(g.groupid)
+        );
+        return focusedGroups;
       }
     }
 
@@ -297,7 +319,7 @@ export default function groups(
     // Step 4. Combine all the groups into a single list and set additional
     // metadata on them that will be used elsewhere in the app.
     const isLoggedIn = token !== null;
-    const groups = filterGroups(
+    const groups = await filterGroups(
       combineGroups(myGroups, featuredGroups, documentUri),
       isLoggedIn,
       directLinkedAnnotationGroupId,

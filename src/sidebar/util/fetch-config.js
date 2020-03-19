@@ -169,11 +169,16 @@ export async function fetchConfig(appConfig, window_ = window) {
       requestConfigFromFrame.ancestorLevel,
       window_
     );
-    return await fetchConfigRpc(
+    const config = await fetchConfigRpc(
       appConfig,
       parentFrame,
       requestConfigFromFrame.origin
     );
+    // Save the frame and origin so other parts of the UI may use values to send
+    // RCP requests out.
+    config.ancestorFrame = parentFrame;
+    config.ancestorOrigin = requestConfigFromFrame.origin;
+    return config;
   } else {
     throw new Error(
       'Improper `requestConfigFromFrame` object. Both `ancestorLevel` and `origin` need to be specified'
